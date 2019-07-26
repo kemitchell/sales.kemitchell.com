@@ -55,6 +55,8 @@ var server = require('http').createServer(function (request, response) {
   response.end()
 })
 
+var questionnaire = require('./questionnaire')
+
 function get (request, response) {
   var password = request.query.password
   if (!password) {
@@ -65,6 +67,36 @@ function get (request, response) {
     response.statusCode = 403
     return response.end()
   }
+  var fields = questionnaire
+    .map(function (section) {
+      return `<fieldset><legend>${section.heading}</legend>${inputs()}</fieldset>`
+      function inputs () {
+        return section.questions
+          .map(function (question) {
+            var name = question.name
+            var prompt = question.prompt
+            var label = `<label for=${name}>${prompt}</label>`
+            var input
+            if (question.options) {
+              input = `<select name=${name}>${options(question)}</select>`
+            } else {
+              input = `<textarea name=${name}></textarea>`
+            }
+            return label + input
+          })
+          .join('')
+      }
+
+      function options (question) {
+        var options = question.options
+        return Object.keys(question.options)
+          .map(function (value) {
+            return `<option value=${value}>${options[value]}</option>`
+          })
+          .join('')
+      }
+    })
+    .join('')
   response.end(`
 <!doctype html>
 <html lang=en-US>
@@ -93,62 +125,7 @@ button, input, textarea, select {
 
     <main role=main>
       <form action=/ method=post>
-        <fieldset>
-          <legend>Lead</legend>
-          <label for=who>Who is the lead?</label>
-          <input name=who type=text required>
-          <label for=prior>Have we sold this company or corporate group before?</label>
-          <select name=prior>
-            <option value=yes>Yes</option>
-            <option value=no>No</option>
-            <option value=unsure>Not Sure</option>
-          </select>
-          <label for=where>Where are they based?</label>
-          <input name=where type=text required>
-        </fieldset>
-
-        <fieldset>
-          <legend>Opportunity</legend>
-          <label for=money>How much money are we talking?</label>
-          <input name=money type=text>
-          <label for=needs>Any unusual needs on their part?</label>
-          <textarea name=needs></textarea>
-          <label for=grow>Is there unusually high potential for the dollar value of this deal to grow over time?</label>
-          <textarea name=grow></textarea>
-          <label for=affiliates>Are we aware of other business groups or corporate affiliates we can sell to?</label>
-          <textarea name=affiliates></textarea>
-          <label for=strategic>Is this lead strategically valuable in some other way?</label>
-          <textarea name=strategic></textarea>
-        </fieldset>
-
-        <fieldset>
-          <legend>Process</legend>
-          <label for=legal>Is their legal already involved?</label>
-          <select name=legal>
-            <option value=yes>Yes</option>
-            <option value=no>No</option>
-          </select>
-          <label for=>Have we received or responded to any questionnaires?  Please send me copies, and let me know who handled them.</label>
-          <select name=questionnaires>
-            <option value=yes>Yes</option>
-            <option value=no>No</option>
-          </select>
-          <label for=>Is their budget or procurement process tied to a deadline, like the end of a quarter?</label>
-          <input name=deadline type=text>
-        </fieldset>
-
-        <fieldset>
-          <legend>Competition</legend>
-          <label for=rfp>Are we participating in an RFP, beauty contest, or bake-off?</label>
-          <select name=incumbent>
-            <option value=RFP>RFP</option>
-            <option value=bakeoff>Beauty Contest/Bake-Off</option>
-            <option value=no>No</option>
-          </select>
-          <label for=competitor>Are they currently with a competitor?</label>
-          <textarea name=competitor></textarea>
-        </fieldset>
-
+        ${fields}
         <fieldset>
           <legend>Submit</legend>
           <label for=cc>Your E-Mail</label>
@@ -164,26 +141,7 @@ button, input, textarea, select {
   `.trim())
 }
 
-/*
-var fields = [
-  'who',
-  'prior',
-  'where',
-  'money',
-  'needs',
-  'grow',
-  'affiliates',
-  'strategic',
-  'legal',
-  'questionnaires',
-  'deadline',
-  'incumbent',
-  'competitor',
-  'cc',
-]
-*/
-
-var Busboy = require('Busboy')
+var Busboy = require('busboy')
 var fs = require('fs')
 var runSeries = require('run-series')
 var path = require('path')

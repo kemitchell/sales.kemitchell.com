@@ -1,0 +1,92 @@
+[
+  {
+    "heading": "Lead",
+    "questions": [
+      {
+        "name": "lead",
+        "prompt": "Who is the lead?"
+      },
+      {
+        "name": "before",
+        "prompt": "Have we sold this company or corporate group before?",
+        "options": {
+          "no": "No",
+          "yes": "Yes",
+          "unsure": "Not Sure"
+        }
+      },
+      {
+        "name": "where",
+        "prompt": "Where are they based?"
+      }
+    ]
+  },
+  {
+    "heading": "Opportunity",
+    "questions": [
+      {
+        "name": "money",
+        "prompt": "How much money are we talking?"
+      },
+      {
+        "name": "needs",
+        "prompt": "Any unusual needs on their part?"
+      },
+      {
+        "name": "expand",
+        "prompt": "Is there unusually high potential for the dollar value of the deal to grow over time?"
+      },
+      {
+        "name": "master",
+        "prompt": "Are we aware of other business groups or corporate affiliates we can sell to?"
+      },
+      {
+        "name": "strategy",
+        "prompt": "Is this lead strategically valuable in some other way?"
+      }
+    ]
+  },
+  {
+    "heading": "Process",
+    "questions": [
+      {
+        "name": "legal",
+        "prompt": "Is their legal already involved?",
+        "options": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      },
+      {
+        "name": "questionnaires",
+        "prompt": "Have we received or responded to any questionnaires? Please send me copies, and let me know who handled them.",
+        "options": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      },
+      {
+        "name": "deadline",
+        "prompt": "Is their budget or procurement process tied to a deadline, like the end of a quarter?"
+      }
+    ]
+  },
+  {
+    "heading": "Competition",
+    "questions": [
+      {
+        "name": "rfp",
+        "prompt": "Are we participating in an RFP, beauty contest, or bake-off?",
+        "options": {
+          "no": "No",
+          "rfp": "RFP",
+          "bakeoff": "Beauty Content/Bake-Off"
+        }
+      },
+      {
+        "name": "incumbent",
+        "prompt": "Are they currently with a competitor?"
+      }
+    ]
+  }
+]

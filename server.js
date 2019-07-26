@@ -145,9 +145,11 @@ var Busboy = require('busboy')
 var fs = require('fs')
 var runSeries = require('run-series')
 var path = require('path')
+var uuid = require('uuid')
 
 function post (request, response) {
-  var data = {}
+  var id = uuid.v4()
+  var data = { date: new Date().toISOString() }
   request.pipe(
     new Busboy({ headers: request.headers })
       .on('field', function (name, value) {
@@ -159,11 +161,10 @@ function post (request, response) {
         if (expected) data[name] = value.trim()
       })
       .on('finish', function () {
-        var date = data.date = new Date().toISOString()
         runSeries([
           function writeToFile (done) {
             fs.writeFile(
-              path.join(DATA, date + '.json'),
+              path.join(DATA, `${id}.json`),
               JSON.stringify({ data, questionnaire }, null, 2),
               done
             )

@@ -27,6 +27,8 @@ if (!PASSWORD) {
   process.exit(1)
 }
 
+var DATA = process.env.DATA || 'sales'
+
 var DOMAIN = process.env.DOMAIN || 'sales@kemitchell.com'
 var FROM = process.env.FROM || 'form@' + DOMAIN
 var TO = process.env.TO
@@ -184,6 +186,7 @@ var fields = [
 var Busboy = require('Busboy')
 var fs = require('fs')
 var runSeries = require('run-series')
+var path = require('path')
 
 function post (request, response) {
   var data = {}
@@ -197,7 +200,7 @@ function post (request, response) {
         runSeries([
           function writeToFile (done) {
             fs.writeFile(
-              date,
+              path.join(DATA, date + '.json'),
               JSON.stringify(data, null, 2),
               done
             )

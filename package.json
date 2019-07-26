@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {
     "busboy": "^0.3.1",
+    "commonmark": "^0.29.0",
     "form-data": "^2.5.0",
     "pino": "^5.13.1",
     "pino-http": "^4.2.0",

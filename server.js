@@ -151,7 +151,12 @@ function post (request, response) {
   request.pipe(
     new Busboy({ headers: request.headers })
       .on('field', function (name, value) {
-        data[name] = value.trim()
+        var expected = questionnaire.some(function (section) {
+          return section.questions.some(function (question) {
+            return question.name === name
+          })
+        })
+        if (expected) data[name] = value.trim()
       })
       .on('finish', function () {
         var date = data.date = new Date().toISOString()
@@ -159,7 +164,7 @@ function post (request, response) {
           function writeToFile (done) {
             fs.writeFile(
               path.join(DATA, date + '.json'),
-              JSON.stringify(data, null, 2),
+              JSON.stringify({ data, questionnaire }, null, 2),
               done
             )
           },
@@ -185,8 +190,10 @@ function email (data, log) {
   form.append('from', FROM)
   form.append('to', TO)
   form.append('cc', data.cc)
-  form.append('subject', 'Sales Referral')
-  form.append('text', dataToMessage(data))
+  form.append('subject', 'Sales Intake')
+  var markdown = dataToMarkdown(data)
+  form.append('text', markdown)
+  form.append('html', renderMarkdown(markdown))
   var options = {
     method: 'POST',
     host: 'api.mailgun.net',
@@ -211,12 +218,32 @@ function email (data, log) {
   form.pipe(request)
 }
 
-function dataToMessage (data) {
-  // TODO HTML e-mail
-  return JSON.stringify(data, null, 2)
+function dataToMarkdown (data) {
+  return questionnaire
+    .map(function (section) {
+      var heading = `## ${section.heading}\n\n`
+      var answers = section.questions
+        .map(function (question) {
+          var name = question.name
+          var answer = data[name]
+          return `${question.prompt}\n\n> ${answer}`
+        })
+        .join('\n\n')
+      return heading + answers
+    })
+    .join('\n\n') + '\n'
 }
 
 server.listen(process.env.PORT || 8080, function () {
   var port = this.address().port
   log.info({ port }, 'litening')
 })
+
+var commonmark = require('commonmark')
+
+function renderMarkdown (markdown) {
+  var reader = new commonmark.Parser()
+  var writer = new commonmark.HtmlRenderer()
+  var parsed = reader.parse(markdown)
+  return writer.render(parsed)
+}

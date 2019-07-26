@@ -127,6 +127,12 @@ button, input, textarea, select {
       <form action=/ method=post>
         ${fields}
         <fieldset>
+          <legend>Files</legend>
+          <input name=files[] type=file>
+          <input name=files[] type=file>
+          <input name=files[] type=file>
+        </fieldset>
+        <fieldset>
           <legend>Submit</legend>
           <label for=cc>Your E-Mail</label>
           <input name=cc type=email>
@@ -149,7 +155,10 @@ var uuid = require('uuid')
 
 function post (request, response) {
   var id = uuid.v4()
-  var data = { date: new Date().toISOString() }
+  var data = {
+    date: new Date().toISOString(),
+    files: []
+  }
   request.pipe(
     new Busboy({ headers: request.headers })
       .on('field', function (name, value) {
@@ -159,6 +168,9 @@ function post (request, response) {
           })
         })
         if (expected) data[name] = value.trim()
+      })
+      .on('file', function (name, file) {
+        data.files.push(file)
       })
       .on('finish', function () {
         runSeries([
@@ -195,6 +207,9 @@ function email (data, log) {
   var markdown = dataToMarkdown(data)
   form.append('text', markdown)
   form.append('html', renderMarkdown(markdown))
+  data.files.forEach(function (file) {
+    form.append('attachment', file)
+  })
   var options = {
     method: 'POST',
     host: 'api.mailgun.net',

@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "dependencies": {
+    "busboy": "^0.3.1",
+    "form-data": "^2.5.0",
+    "pino": "^5.13.1",
+    "pino-http": "^4.2.0",
+    "run-series": "^1.1.8",
+    "simple-concat": "^1.0.0",
+    "url-parse": "^1.4.7"
+  }
+}

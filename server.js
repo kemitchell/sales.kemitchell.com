@@ -201,6 +201,7 @@ function post (request, response) {
             response.statusCode = 500
             return response.end(`<p>Internal Error</p>`)
           }
+          response.end('<p>Success! You should receive an e-mail shortly.</p>')
         })
       })
   )

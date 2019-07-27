@@ -200,8 +200,7 @@ function post (request, response) {
             })
           },
           function sendEMail (done) {
-            email(data, request.log)
-            done()
+            email(data, request.log, done)
           }
         ], function (error) {
           if (error) {
@@ -219,7 +218,7 @@ var FormData = require('form-data')
 var https = require('https')
 var simpleConcat = require('simple-concat')
 
-function email (data, log) {
+function email (data, log, callback) {
   var form = new FormData()
   form.append('from', FROM)
   form.append('to', TO)
@@ -252,13 +251,15 @@ function email (data, log) {
     var status = response.statusCode
     if (status === 200) {
       log.info({ event: 'sent' })
-      return
+      return callback()
     }
     simpleConcat(response, function (_, buffer) {
+      var message = buffer.toString()
       log.error({
         status: response.statusCode,
-        body: buffer.toString()
+        body: message
       }, 'MailGun error')
+      callback(new Error('MailGun:' + message))
     })
   })
   form.pipe(request)

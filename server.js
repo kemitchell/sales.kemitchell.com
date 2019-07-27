@@ -27,7 +27,9 @@ if (!PASSWORD) {
   process.exit(1)
 }
 
+var path = require('path')
 var DATA = process.env.DATA || 'sales'
+var CLIENTS = process.env.CLIENTS || path.join(DATA, 'clients.json')
 
 var DOMAIN = process.env.DOMAIN || 'sales@kemitchell.com'
 var FROM = process.env.FROM || 'form@' + DOMAIN
@@ -150,7 +152,6 @@ button, input, textarea, select {
 var Busboy = require('busboy')
 var fs = require('fs')
 var runSeries = require('run-series')
-var path = require('path')
 var uuid = require('uuid')
 
 function post (request, response) {
@@ -181,6 +182,13 @@ function post (request, response) {
               done
             )
           },
+          function loadClientData (done) {
+            readClientData(data.cc, function (error, client) {
+              if (error) return done(error)
+              data.client = client
+              done()
+            })
+          },
           function sendEMail (done) {
             email(data, done)
           }
@@ -202,7 +210,7 @@ function email (data, log) {
   var form = new FormData()
   form.append('from', FROM)
   form.append('to', TO)
-  form.append('cc', data.cc)
+  var cc = [data.cc.toLowerCase()]
   form.append('subject', 'Sales Intake')
   var markdown = dataToMarkdown(data)
   form.append('text', markdown)
@@ -210,6 +218,12 @@ function email (data, log) {
   data.files.forEach(function (file) {
     form.append('attachment', file)
   })
+  var client = data.client
+  if (client) {
+    var address = client.cc.toLowerCase()
+    if (!cc.includes(address)) cc.push(address)
+  }
+  form.append('cc', cc.join(', '))
   var options = {
     method: 'POST',
     host: 'api.mailgun.net',
@@ -262,4 +276,36 @@ function renderMarkdown (markdown) {
   var writer = new commonmark.HtmlRenderer()
   var parsed = reader.parse(markdown)
   return writer.render(parsed)
+}
+
+var has = require('has')
+
+function readClientData (email, callback) {
+  fs.readFile(CLIENTS, function (error, buffer) {
+    if (error) {
+      if (error.code === 'ENOENT') return callback(null, false)
+      return callback(error)
+    }
+    try {
+      var parsed = JSON.parse(buffer)
+    } catch (error) {
+      return callback(error)
+    }
+    if (Array.isArray(parsed)) return callback(null, false)
+    var client = parsed.find(function (client) {
+      var matchesEMail = (
+        has(client, 'emails') &&
+        client.emails.includes(email)
+      )
+      if (matchesEMail) return true
+      var domain = email.split('@')[1].toLowerCase()
+      var matchesDomain = (
+        has(client, 'domain') &&
+        client.domain.toLowerCase() === domain
+      )
+      if (matchesDomain) return true
+      return false
+    }) || false
+    callback(null, client)
+  })
 }

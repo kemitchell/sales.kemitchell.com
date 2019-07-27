@@ -181,6 +181,7 @@ function post (request, response) {
         if (whitelist.includes(name)) data[name] = value.trim()
       })
       .on('file', function (field, stream, name, encoding, mime) {
+        // TODO: Write files to disk, stream to attachments from there.
         data.files.push({ stream, name, mime })
       })
       .on('finish', function () {

@@ -194,6 +194,7 @@ function post (request, response) {
           }
         ], function (error) {
           if (error) {
+            request.log.error(error)
             response.statusCode = 500
             return response.end(`<p>Internal Error</p>`)
           }

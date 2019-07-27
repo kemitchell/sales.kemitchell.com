@@ -160,15 +160,16 @@ function post (request, response) {
     date: new Date().toISOString(),
     files: []
   }
+  var whitelist = ['cc']
+  questionnaire.forEach(function (section) {
+    return section.questions.some(function (question) {
+      whitelist.push(question.name)
+    })
+  })
   request.pipe(
     new Busboy({ headers: request.headers })
       .on('field', function (name, value) {
-        var expected = questionnaire.some(function (section) {
-          return section.questions.some(function (question) {
-            return question.name === name
-          })
-        })
-        if (expected) data[name] = value.trim()
+        if (whitelist.includes(name)) data[name] = value.trim()
       })
       .on('file', function (name, file) {
         data.files.push(file)

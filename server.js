@@ -224,7 +224,7 @@ function email (data, log) {
   form.append('from', FROM)
   form.append('to', TO)
   var cc = [data.cc.toLowerCase()]
-  form.append('subject', 'Sales Intake')
+  form.append('subject', 'Sales Intake: ' + data.lead)
   var markdown = dataToMarkdown(data)
   form.append('text', markdown)
   form.append('html', renderMarkdown(markdown))

@@ -172,7 +172,7 @@ function post (request, response) {
       .on('field', function (name, value) {
         if (whitelist.includes(name)) data[name] = value.trim()
       })
-      .on('file', function (name, stream, name, encoding, mime) {
+      .on('file', function (field, stream, name, encoding, mime) {
         data.files.push({ stream, name, mime })
       })
       .on('finish', function () {

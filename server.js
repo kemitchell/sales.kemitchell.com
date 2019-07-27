@@ -126,7 +126,7 @@ button, input, textarea, select {
     </header>
 
     <main role=main>
-      <form action=/ method=post>
+      <form action=/?password=${PASSWORD} method=post>
         ${fields}
         <fieldset>
           <legend>Files</legend>
@@ -155,7 +155,15 @@ var runSeries = require('run-series')
 var uuid = require('uuid')
 
 function post (request, response) {
-  // TODO: Require password.
+  var password = request.query.password
+  if (!password) {
+    response.statusCode = 401
+    return response.end()
+  }
+  if (password !== PASSWORD) {
+    response.statusCode = 403
+    return response.end()
+  }
   var id = uuid.v4()
   var data = {
     date: new Date().toISOString(),

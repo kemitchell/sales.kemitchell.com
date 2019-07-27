@@ -172,8 +172,8 @@ function post (request, response) {
       .on('field', function (name, value) {
         if (whitelist.includes(name)) data[name] = value.trim()
       })
-      .on('file', function (name, file) {
-        data.files.push(file)
+      .on('file', function (name, stream, name, encoding, mime) {
+        data.files.push({ stream, name, mime })
       })
       .on('finish', function () {
         runSeries([
@@ -221,7 +221,10 @@ function email (data, log) {
   form.append('text', markdown)
   form.append('html', renderMarkdown(markdown))
   data.files.forEach(function (file) {
-    form.append('attachment', file)
+    form.append('attachment', file.stream, {
+      contentType: file.mime,
+      filename: file.name
+    })
   })
   var client = data.client
   if (client) {

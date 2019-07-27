@@ -240,6 +240,7 @@ function email (data, log, callback) {
     if (!cc.includes(address)) cc.push(address)
   }
   form.append('cc', cc.join(', '))
+  form.append('h:Reply-To', data.cc)
   var options = {
     method: 'POST',
     host: 'api.mailgun.net',

@@ -155,6 +155,7 @@ var runSeries = require('run-series')
 var uuid = require('uuid')
 
 function post (request, response) {
+  // TODO: Require password.
   var id = uuid.v4()
   var data = {
     date: new Date().toISOString(),
@@ -191,7 +192,8 @@ function post (request, response) {
             })
           },
           function sendEMail (done) {
-            email(data, done)
+            email(data, request.log)
+            done()
           }
         ], function (error) {
           if (error) {

@@ -311,7 +311,7 @@ server.listen(process.env.PORT || 8080, function () {
 var commonmark = require('commonmark')
 
 function renderMarkdown (markdown) {
-  var reader = new commonmark.Parser()
+  var reader = new commonmark.Parser({ smart: true })
   var writer = new commonmark.HtmlRenderer()
   var parsed = reader.parse(markdown)
   return writer.render(parsed)

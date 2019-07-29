@@ -151,6 +151,9 @@ button, input, textarea, select {
 
 var Busboy = require('busboy')
 var fs = require('fs')
+var mkdirp = require('mkdirp')
+var pump = require('pump')
+var runParallel = require('run-parallel')
 var runSeries = require('run-series')
 var uuid = require('uuid')
 
@@ -181,15 +184,41 @@ function post (request, response) {
         if (whitelist.includes(name)) data[name] = value.trim()
       })
       .on('file', function (field, stream, name, encoding, mime) {
-        // TODO: Write files to disk, stream to attachments from there.
         data.files.push({ stream, name, mime })
       })
       .on('finish', function () {
+        var directory = path.join(DATA, id)
+        data.directory = directory
         runSeries([
-          function writeToFile (done) {
+          function makeDirectory (done) {
+            mkdirp(directory, done)
+          },
+          function writeAttachments (done) {
+            if (data.files.length === 0) return done()
+            var attachments = path.join(directory, 'attachments')
+            mkdirp(attachments, function (error) {
+              if (error) return done(error)
+              runParallel(data.files.map(function (entry) {
+                return function (done) {
+                  var file = path.join(attachments, entry.name)
+                  entry.path = file
+                  pump(
+                    entry.stream,
+                    fs.createWriteStream(file),
+                    done
+                  )
+                }
+              }), done)
+            })
+          },
+          function writeDataFile (done) {
+            var files = data.files.map(function (entry) {
+              return { name: entry.name, mime: entry.mime }
+            })
+            var object = { data, questionnaire, files }
             fs.writeFile(
               path.join(DATA, `${id}.json`),
-              JSON.stringify({ data, questionnaire }, null, 2),
+              JSON.stringify(object, null, 2),
               done
             )
           },
@@ -228,11 +257,8 @@ function email (data, log, callback) {
   var markdown = dataToMarkdown(data)
   form.append('text', markdown)
   form.append('html', renderMarkdown(markdown))
-  data.files.forEach(function (file) {
-    form.append('attachment', file.stream, {
-      contentType: file.mime,
-      filename: file.name
-    })
+  data.files.forEach(function (entry) {
+    form.append('attachment', fs.createReadStream(entry.path))
   })
   var client = data.client
   if (client) {

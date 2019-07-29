@@ -217,7 +217,7 @@ function post (request, response) {
             })
             var object = { data, questionnaire, files }
             fs.writeFile(
-              path.join(DATA, `${id}.json`),
+              path.join(directory, `data.json`),
               JSON.stringify(object, null, 2),
               done
             )

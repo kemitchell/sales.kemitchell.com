@@ -9,7 +9,6 @@
     "pino": "^5.13.1",
     "pino-http": "^4.2.0",
     "pump": "^3.0.0",
-    "run-parallel": "^1.1.9",
     "run-series": "^1.1.8",
     "simple-concat": "^1.0.0",
     "url-parse": "^1.4.7",

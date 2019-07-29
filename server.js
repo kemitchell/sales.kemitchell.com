@@ -126,7 +126,10 @@ button, input, textarea, select {
     </header>
 
     <main role=main>
-      <form action=/?password=${PASSWORD} method=post>
+      <form
+          action=/?password=${PASSWORD}
+          method=post
+          enctype=multipart/form-data>
         ${fields}
         <fieldset>
           <legend>Files</legend>
@@ -151,7 +154,6 @@ var Busboy = require('busboy')
 var fs = require('fs')
 var mkdirp = require('mkdirp')
 var pump = require('pump')
-var runParallel = require('run-parallel')
 var runSeries = require('run-series')
 var uuid = require('uuid')
 
@@ -166,9 +168,12 @@ function post (request, response) {
     return response.end()
   }
   var id = uuid.v4()
+  var directory = path.join(DATA, id)
+  var attachments = path.join(directory, 'attachments')
   var data = {
     date: new Date().toISOString(),
-    files: []
+    files: [],
+    directory
   }
   var whitelist = ['cc']
   questionnaire.forEach(function (section) {
@@ -182,32 +187,23 @@ function post (request, response) {
         if (whitelist.includes(name)) data[name] = value.trim()
       })
       .on('file', function (field, stream, name, encoding, mime) {
-        data.files.push({ stream, name, mime })
+        mkdirp(attachments, function (error) {
+          if (error) return request.log.error(error)
+          var file = path.join(attachments, name)
+          pump(
+            stream,
+            fs.createWriteStream(file),
+            function (error) {
+              if (error) return request.log.error(error)
+              data.files.push(file)
+            }
+          )
+        })
       })
       .on('finish', function () {
-        var directory = path.join(DATA, id)
-        data.directory = directory
         runSeries([
           function makeDirectory (done) {
             mkdirp(directory, done)
-          },
-          function writeAttachments (done) {
-            if (data.files.length === 0) return done()
-            var attachments = path.join(directory, 'attachments')
-            mkdirp(attachments, function (error) {
-              if (error) return done(error)
-              runParallel(data.files.map(function (entry) {
-                return function (done) {
-                  var file = path.join(attachments, entry.name)
-                  entry.path = file
-                  pump(
-                    entry.stream,
-                    fs.createWriteStream(file),
-                    done
-                  )
-                }
-              }), done)
-            })
           },
           function writeDataFile (done) {
             var files = data.files.map(function (entry) {
@@ -255,8 +251,8 @@ function email (data, log, callback) {
   var markdown = dataToMarkdown(data)
   form.append('text', markdown)
   form.append('html', renderMarkdown(markdown))
-  data.files.forEach(function (entry) {
-    form.append('attachment', fs.createReadStream(entry.path))
+  data.files.forEach(function (file) {
+    form.append('attachment', fs.createReadStream(file))
   })
   var client = data.client
   if (client) {

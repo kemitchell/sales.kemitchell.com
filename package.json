@@ -13,5 +13,11 @@
     "simple-concat": "^1.0.0",
     "url-parse": "^1.4.7",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "standard": "^13.1.0"
+  },
+  "scripts": {
+    "lint": "standard"
   }
 }

@@ -142,6 +142,7 @@ button, input, textarea, select {
           <legend>Submit</legend>
           <label for=cc>Your E-Mail</label>
           <input name=cc type=email required>
+          <p>You will be carbon copied on a summary of this form.</p>
           <button type=submit>Submit</button>
         </fieldset>
       </form>

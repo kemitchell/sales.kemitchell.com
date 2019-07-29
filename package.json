@@ -4,6 +4,7 @@
   "dependencies": {
     "busboy": "^0.3.1",
     "commonmark": "^0.29.0",
+    "escape-html": "^1.0.3",
     "form-data": "^2.5.0",
     "has": "^1.0.3",
     "mkdirp": "^0.5.1",

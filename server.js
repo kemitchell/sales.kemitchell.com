@@ -27,6 +27,8 @@ if (!PASSWORD) {
   process.exit(1)
 }
 
+var TITLE = process.env.TITLE || 'Sales Intake Form'
+
 var path = require('path')
 var DATA = process.env.DATA || 'sales'
 var CLIENTS = process.env.CLIENTS || path.join(DATA, 'clients.json')
@@ -58,6 +60,7 @@ var server = require('http').createServer(function (request, response) {
 })
 
 var questionnaire = require('./questionnaire')
+var escapeHTML = require('escape-html')
 
 function get (request, response) {
   var password = request.query.password
@@ -105,7 +108,7 @@ function get (request, response) {
   <head>
     <meta charset=UTF-8>
     <meta name=viewport content=width=device-width,initial-scale=1>
-    <title>Sales Intake</title>
+    <title>${escapeHTML(TITLE)}</title>
     <link href=https://readable.kemitchell.com/all.css rel=stylesheet>
     <style>
 label, button, input, textarea, select {
@@ -122,7 +125,7 @@ button, input, textarea, select {
 
   <body>
     <header role=banner>
-      <h1>Sales Intake</h1>
+      <h1>${escapeHTML(TITLE)}</h1>
     </header>
 
     <main role=main>

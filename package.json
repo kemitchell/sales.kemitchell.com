@@ -17,7 +17,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "licensee": "^7.0.2",
+    "licensee": "^7.0.3",
     "standard": "^13.1.0"
   },
   "scripts": {

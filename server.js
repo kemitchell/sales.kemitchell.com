@@ -116,9 +116,14 @@ label, button, input, textarea, select {
   width: 100%;
   box-sizing: border-box;
 }
+
 button, input, textarea, select {
   margin-bottom: 1rem;
   padding: 0.5rem;
+}
+
+fieldset {
+  margin: 1rem 0;
 }
     </style>
   </head>

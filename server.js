@@ -130,9 +130,7 @@ button, input, textarea, select {
         ${fields}
         <fieldset>
           <legend>Files</legend>
-          <input name=files[] type=file>
-          <input name=files[] type=file>
-          <input name=files[] type=file>
+          <input name=files[] type=file multiple>
         </fieldset>
         <fieldset>
           <legend>Submit</legend>

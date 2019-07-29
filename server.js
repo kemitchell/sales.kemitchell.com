@@ -80,9 +80,9 @@ function get (request, response) {
             var label = `<label for=${name}>${prompt}</label>`
             var input
             if (question.options) {
-              input = `<select name=${name}>${options(question)}</select>`
+              input = `<select name=${name} required>${options(question)}</select>`
             } else {
-              input = `<textarea name=${name}></textarea>`
+              input = `<textarea name=${name} required></textarea>`
             }
             return label + input
           })
@@ -137,7 +137,7 @@ button, input, textarea, select {
         <fieldset>
           <legend>Submit</legend>
           <label for=cc>Your E-Mail</label>
-          <input name=cc type=email>
+          <input name=cc type=email required>
           <button type=submit>Submit</button>
         </fieldset>
       </form>
